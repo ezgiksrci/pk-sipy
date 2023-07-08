@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
+using N11ProductService;
 
 namespace SipayApi.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("sipy/api/[controller]")]
     public class WeatherForecastController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
@@ -19,8 +20,8 @@ namespace SipayApi.Controllers
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
-        {
+        public async Task<IEnumerable<WeatherForecast>> GetAsync()
+        {            
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
                 Date = DateTime.Now.AddDays(index),

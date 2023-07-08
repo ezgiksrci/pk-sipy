@@ -4,8 +4,9 @@
 
 namespace SipayApi.Controllers;
 
-[Route("sipy/api/[controller]")]
+
 [ApiController]
+[Route("sipy/api/[controller]")]
 public class RouteValuesController : ControllerBase
 {
 
