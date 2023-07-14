@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using N11ProductService;
 
 namespace SipayApi.Controllers
 {
