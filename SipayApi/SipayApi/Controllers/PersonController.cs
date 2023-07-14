@@ -1,89 +1,91 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace SipayApi.Controllers;
-
-public class Person
+namespace SipayApi.Controllers
 {
-    [DisplayName("Staff person name")]
-    [Required]
-    [StringLength(maximumLength: 100, MinimumLength = 5)]
-    public string Name { get; set; }
-
-
-    [DisplayName("Staff person lastname")]
-    [Required]
-    [StringLength(maximumLength: 100, MinimumLength = 5)]
-    public string Lastname { get; set; }
-
-
-    [DisplayName("Staff person phone number")]
-    [Required]
-    [Phone]
-    public string Phone { get; set; }
-
-
-    [DisplayName("Staff person access level to system")]
-    [Range(minimum: 1, maximum: 5)]
-    [Required]
-    public int AccessLevel { get; set; }
-
-
-
-    [DisplayName("Staff person salary")]
-    [Required]
-    [Range(minimum: 5000, maximum: 50000)]
-    [SalaryAttribute]
-    public decimal Salary { get; set; }
-}
-
-
-public class SalaryAttribute : ValidationAttribute
-{
-    public SalaryAttribute()
+    public class Person
     {
+        [DisplayName("Staff person name")]
+        public string Name { get; set; }
 
+        [DisplayName("Staff person lastname")]
+        public string Lastname { get; set; }
+
+        [DisplayName("Staff person phone number")]
+        public string Phone { get; set; }
+
+        [DisplayName("Staff person access level to system")]
+        public int AccessLevel { get; set; }
+
+        [DisplayName("Staff person salary")]
+        public decimal Salary { get; set; }
     }
 
-    protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+    public class PersonValidator : AbstractValidator<Person>
     {
-        var person = (Person)validationContext.ObjectInstance;
-        decimal salary = (decimal)value;
-        ValidationResult? message = ValidationResult.Success;
-        switch (person.AccessLevel)
+        public PersonValidator()
         {
-            case 1:
-                message = salary > 10000 ? new ValidationResult("Salary cannot be greater then 10000") : ValidationResult.Success;
-                return message;
-            case 2:
-                message = salary > 20000 ? new ValidationResult("Salary cannot be greater then 20000") : ValidationResult.Success;
-                return message;
-            case 3:
-                message = salary > 30000 ? new ValidationResult("Salary cannot be greater then 30000") : ValidationResult.Success;
-                return message;
-            case 4:
-                message = salary > 40000 ? new ValidationResult("Salary cannot be greater then 40000") : ValidationResult.Success;
-                return message;
-            default:
-                message = new ValidationResult("Salary cannot invalid");
-                break;
+            RuleFor(x => x.Name)
+                .NotEmpty().WithMessage("Staff person name is required.")
+                .Length(5, 100).WithMessage("Staff person name must be between 5 and 100 characters.");
+
+            RuleFor(x => x.Lastname)
+                .NotEmpty().WithMessage("Staff person lastname is required.")
+                .Length(5, 100).WithMessage("Staff person lastname must be between 5 and 100 characters.");
+
+            RuleFor(x => x.Phone)
+                .NotEmpty().WithMessage("Staff person phone number is required.")
+                .Matches(@"^\d{10}$").WithMessage("Staff person phone number must be a valid 10-digit phone number.");
+
+            RuleFor(x => x.AccessLevel)
+                .InclusiveBetween(1, 5).WithMessage("Staff person access level to system must be between 1 and 5.");
+
+            RuleFor(x => x.Salary)
+                .Must((person, salary) => IsValidSalary(person.AccessLevel, salary))
+                .WithMessage("Invalid salary for the specified access level.");
         }
-        return message;
+
+        private bool IsValidSalary(int accessLevel, decimal salary)
+        {
+            switch (accessLevel)
+            {
+                case 1:
+                    return salary <= 10000;
+                case 2:
+                    return salary <= 20000;
+                case 3:
+                    return salary <= 30000;
+                case 4:
+                    return salary <= 40000;
+                default:
+                    return false;
+            }
+        }
     }
-}
 
-[ApiController]
-[Route("sipy/api/[controller]")]
-public class PersonController : ControllerBase
-{
-
-    public PersonController() { }
-
-
-    [HttpPost]
-    public Person Post([FromBody] Person person)
+    [ApiController]
+    [Route("sipay/api/[controller]")]
+    public class PersonController : ControllerBase
     {
-        return person;
+        private readonly IValidator<Person> _validator;
+
+        public PersonController(IValidator<Person> validator)
+        {
+            _validator = validator;
+        }
+
+        [HttpPost]
+        public IActionResult Post(Person person)
+        {
+            var validationResult = _validator.Validate(person);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
+
+            return Ok(person);
+        }
     }
 }

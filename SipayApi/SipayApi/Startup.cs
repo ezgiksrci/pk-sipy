@@ -1,4 +1,6 @@
+using FluentValidation;
 using Microsoft.OpenApi.Models;
+using SipayApi.Controllers;
 
 namespace SipayApi;
 
@@ -20,6 +22,7 @@ public class Startup
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Sipay Api Collection", Version = "v1" });
         });
+        services.AddTransient<IValidator<Person>, PersonValidator>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
