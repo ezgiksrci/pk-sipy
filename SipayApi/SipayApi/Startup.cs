@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using SipayApi.DataAccess;
 
 namespace SipayApi;
 
@@ -11,7 +13,7 @@ public class Startup
 
     public IConfiguration Configuration { get; }
 
-    // This method gets called by the runtime. Use this method to add services to the container.
+    
     public void ConfigureServices(IServiceCollection services)
     {
 
@@ -20,9 +22,25 @@ public class Startup
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Sipay Api Collection", Version = "v1" });
         });
+
+
+        //dbcontext
+        var dbType = Configuration.GetConnectionString("DbType");
+        if (dbType == "Sql")
+        {
+            var dbConfig = Configuration.GetConnectionString("MsSqlConnection");
+            services.AddDbContext<SimDbContext>(opts =>
+            opts.UseSqlServer(dbConfig));
+        }
+        else if (dbType == "PostgreSql")
+        {
+            var dbConfig = Configuration.GetConnectionString("PostgreSqlConnection");
+            services.AddDbContext<SimDbContext>(opts =>
+              opts.UseNpgsql(dbConfig));
+        }
     }
 
-    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+  
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         if (env.IsDevelopment())

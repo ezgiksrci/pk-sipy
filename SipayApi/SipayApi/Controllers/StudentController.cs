@@ -35,8 +35,8 @@ public class StudentController : ControllerBase
     {
         list = new();
         list.Add(new Student { Id = 1, Age = 23, Email = "deny@sellen.com", Lastname = "Sellen", Name = "Deny" });
-        list.Add(new Student { Id = 2, Age = 24, Email = "deny@sellen.com", Lastname = "Sellen", Name = "Deny" });
-        list.Add(new Student { Id = 3, Age = 25, Email = "deny@sellen.com", Lastname = "Sellen", Name = "Deny" });
+        list.Add(new Student { Id = 2, Age = 24, Email = "deny@sellen.com", Lastname = "Solomor", Name = "Henry" });
+        list.Add(new Student { Id = 3, Age = 25, Email = "deny@sellen.com", Lastname = "Felix", Name = "Jeff" });
     }
 
 
@@ -53,7 +53,7 @@ public class StudentController : ControllerBase
     }
 
     [HttpGet("ByParameters")]
-    public ApiResponse<List<Student>> Get([FromQuery] string name, [FromQuery] string lastname, [FromQuery] int age)
+    public ApiResponse<List<Student>> Get([FromQuery] string? name, [FromQuery] string? lastname, [FromQuery] int? age)
     {
         if (!string.IsNullOrWhiteSpace(name))
         {
@@ -62,6 +62,10 @@ public class StudentController : ControllerBase
         if (!string.IsNullOrWhiteSpace(lastname))
         {
             list = list.Where(x => x.Lastname.ToUpper().Contains(lastname.ToUpper())).ToList();
+        }
+        if (age> 0)
+        {
+            list = list.Where(x => x.Age >= age).ToList();
         }
         return new ApiResponse<List<Student>>(list);
     }
