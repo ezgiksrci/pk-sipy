@@ -1,4 +1,6 @@
-﻿namespace SipayApi.Data.Repository;
+﻿using System.Linq.Expressions;
+
+namespace SipayApi.Data.Repository;
 
 public interface IGenericRepository<Entity> where Entity : class
 {
@@ -10,4 +12,7 @@ public interface IGenericRepository<Entity> where Entity : class
     void DeleteById(int id);
     List<Entity> GetAll();
     IQueryable<Entity> GetAllAsQueryable();
+
+    List<Entity> GetByParameter(Expression<Func<Entity, bool>> expression);
+
 }

@@ -1,4 +1,5 @@
 ﻿using SipayApi.Base;
+using System.Linq.Expressions;
 
 namespace SipayApi.Data.Repository;
 
@@ -52,5 +53,10 @@ public class GenericRepository<Entity> : IGenericRepository<Entity> where Entity
     public void Update(Entity entity)
     {
         dbContext.Set<Entity>().Update(entity);
+    }
+
+    public List<Entity> GetByParameter(Expression<Func<Entity, bool>> expression)
+    {
+        return dbContext.Set<Entity>().Where(expression).ToList();
     }
 }

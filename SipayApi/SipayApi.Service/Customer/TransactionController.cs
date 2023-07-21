@@ -55,4 +55,16 @@ public class TransactionController : ControllerBase
     }
 
 
+    [HttpGet("GetByParameters")]
+    public ApiResponse<List<TransactionResponse>> GetByParameters(int accountNumber, decimal? minCreditAmount, decimal? maxCreditAmount,
+                                                                 decimal? minDebitAmount, decimal? maxDebitAmount, string description,
+                                                                 DateTime? beginDate, DateTime? endDate, string referenceNumber)
+    {
+        var entityList = repository.GetByParameter(accountNumber, minCreditAmount, maxCreditAmount,
+                                                    minDebitAmount, maxDebitAmount, description,
+                                                    beginDate, endDate, referenceNumber);
+
+        var mapped = mapper.Map<List<Transaction>, List<TransactionResponse>>(entityList);
+        return new ApiResponse<List<TransactionResponse>>(mapped);
+    }
 }
